@@ -100,9 +100,12 @@ Public Class MainForm
                 Dim Duration = ExtractionVideo.Item4
 
                 'Modifying the starttime and duration to account for the (rather odd) way of specifying times (or maybe I've gotten it wrong..., it seems to work though...)
-                Duration = Duration + StartTime
-                StartTime = -StartTime
-                If StartTime = -0 Then StartTime = 0
+                Dim ModifyTimes As Boolean = False
+                If ModifyTimes = True Then
+                    Duration = Duration + StartTime
+                    StartTime = -StartTime
+                    If StartTime = -0 Then StartTime = 0
+                End If
 
                 'Creating the output folder
                 IO.Directory.CreateDirectory(IO.Path.GetDirectoryName(OutputPath))
