@@ -96,6 +96,7 @@ Public Class MainForm
 
                 Dim InputPath = ExtractionVideo.Item1
                 Dim OutputPath = ExtractionVideo.Item2
+                Dim OutputPath2 = IO.Path.Combine(IO.Path.GetDirectoryName(OutputPath), IO.Path.GetFileNameWithoutExtension(ExtractionVideo.Item2) & "_B.mp4")
                 Dim StartTime = ExtractionVideo.Item3
                 Dim Duration = ExtractionVideo.Item4
 
@@ -113,17 +114,28 @@ Public Class MainForm
                 'Adding " characters to the paths to allow empty spaces in them
                 InputPath = Chr(34) & InputPath & Chr(34)
                 OutputPath = Chr(34) & OutputPath & Chr(34)
+                OutputPath2 = Chr(34) & OutputPath2 & Chr(34)
 
-                Dim StartTimeString As String = StartTime.ToString.Replace(",", ".")
+                Dim StartTimeString As String = (StartTime).ToString.Replace(",", ".")
                 Dim DurationString As String = Duration.ToString.Replace(",", ".")
+                Dim To_String As String = (StartTime + Duration).ToString.Replace(",", ".")
+
 
                 'Creating resampled file
                 Dim ffmpegProcessStartInfo As New ProcessStartInfo()
                 ffmpegProcessStartInfo.FileName = ffmpegPath
+
                 If StartTime = 0 Then
-                    ffmpegProcessStartInfo.Arguments = "-i " & InputPath & " -c copy " & " -t " & DurationString & " " & OutputPath
+                    'ffmpegProcessStartInfo.Arguments = "-i " & InputPath & " -muxdelay 0 -map 0 -c copy -muxpreload 0" & " -t " & DurationString & " " & OutputPath
+                    ffmpegProcessStartInfo.Arguments = "-i " & InputPath & " -c copy -t " & DurationString & " " & OutputPath
                 Else
-                    ffmpegProcessStartInfo.Arguments = "-i " & InputPath & " -c copy -ss " & StartTimeString & " -t " & DurationString & " " & OutputPath
+                    'N.B. For A/V sync to work well, the -ss argument needs to be an input argument (i.e. specified before -i). Cf https://ffmpeg.org/ffmpeg.html section on "-ss position (input/output)"
+                    'ffmpegProcessStartInfo.Arguments = "-ss " & StartTimeString & " -i " & InputPath & " -c copy -t " & DurationString & " " & OutputPath
+                    'ffmpegProcessStartInfo.Arguments = "-ss " & StartTimeString & " -i " & InputPath & " -muxdelay 0 -map 0 -c copy -muxpreload 0 -t " & DurationString & " " & OutputPath
+                    'ffmpegProcessStartInfo.Arguments = "-ss " & StartTimeString & " -to " & To_String & " -i " & InputPath & " -c copy " & OutputPath
+
+                    ffmpegProcessStartInfo.Arguments = "-ss " & StartTimeString & " -to " & To_String & " -i " & InputPath & " -muxdelay 0 -muxpreload 0 -c copy " & OutputPath
+
                 End If
 
                 If ShowProcessWindow_CheckBox.Checked = False Then
@@ -138,6 +150,115 @@ Public Class MainForm
                 End If
 
                 sp.Close()
+
+                Dim Fade As Boolean = False
+                If Fade = True Then
+
+                    'Cf. http://underpop.online.fr/f/ffmpeg/help/fade.htm.gz
+
+                    Dim FadeDuration As Double = 0.3
+                    Dim FadeOutStartString As String = Math.Max(0, Duration - FadeDuration).ToString.Replace(",", ".")
+                    Dim FadeDurationString As String = FadeDuration.ToString.Replace(",", ".")
+
+                    Dim ffmpegProcessStartInfo2 As New ProcessStartInfo()
+                    ffmpegProcessStartInfo2.FileName = ffmpegPath
+
+                    'ffmpegProcessStartInfo2.Arguments = "-i " & OutputPath & "-vf fade=t=in:st=0:d=10,fade=t=out:st=10:d=5"
+
+                    'ffmpegProcessStartInfo2.Arguments = "-i " & OutputPath & " -vf chromakey=#0047bb " & OutputPath2
+
+                    'ffmpegProcessStartInfo2.Arguments = "-f lavfi -i color=c=black:s=3840x2160 -i " & OutputPath & " -shortest " &
+                    '    " -filter_complex " & Chr(34) & "[1:v]chromakey=#0047bb:0.1:0.2[ckout]; [0:v][ckout]overlay[out]" & Chr(34) &
+                    '    " -map " & Chr(34) & "[out]" & Chr(34) & " " & OutputPath2
+
+                    ffmpegProcessStartInfo2.Arguments = "-f lavfi -i " & Chr(34) & "C:\Temp\1109183.jpg" & Chr(34) & " -i " & OutputPath &
+                        " -filter_complex " & Chr(34) & "[1:v]chromakey=#0047bb:0.1:0.2[ckout]; [0:v][ckout]overlay[out]" & Chr(34) &
+                        " -map " & Chr(34) & "[out]" & Chr(34) & " " & OutputPath2
+
+
+                    'For continued work. Most things tested in command promt only
+
+                    '# Fading
+                    'https://dev.to/dak425/add-fade-in-and-fade-out-effects-with-ffmpeg-2bj7
+                    '
+                    '-vf "fade=t=in:st=0:d=3:color=white" -c:a copy
+                    '
+                    'ffmpeg -i "D:\Eikholt\Testvideos\Output\mix.mp4" -vf "fade=t=in:st=0:d=0.3" -c:a copy "D:\Eikholt\Testvideos\Output\mix_fade.mp4"
+                    '
+                    '# Bluescreen
+                    '
+                    'ffmpeg -i "C:\Temp\1109183.jpg" -i "D:\Eikholt\Testvideos\Output\Actor_1_L16S00_M1.mp4" -filter_complex "[1:v]chromakey=#0047bb:0.1:0.13[ckout]; [0:v][ckout]overlay'[out]" -map "[out]" -map 1:a "D:\Eikholt\Testvideos\Output\Actor_1_L16S00_M1_B.mp4"
+                    '
+                    '
+                    '# Getting audio
+                    '# https://stackoverflow.com/questions/9913032/how-can-i-extract-audio-from-video-with-ffmpeg
+                    'ffmpeg -i <video_file_name.extension> <audio_file_name.extension>
+                    '
+                    'ffmpeg -i "D:\Eikholt\Testvideos\Output\Actor_1_L16S00_M1.mp4" "D:\Eikholt\Testvideos\Output\Actor_1_L16S00_M1.wav"
+                    '
+                    '
+                    '# IR-Reverb
+                    '# https://medium.com/@glynn_bird/applying-reverb-to-audio-with-ffmpeg-and-impulse-responses-81b4480cf5aa
+                    '
+                    'ffmpeg -i "D:\Eikholt\Testvideos\Output\Actor_1_L16S00_M1.wav" -i "D:\Eikholt\Testvideos\S2R4_sweep4000.wav" -filter_complex "[0] [1] afir=dry=10:wet=10" "D:\Eikholt\Testvideos\Output\output.wav"
+                    '
+                    'ffmpeg -i "D:\Eikholt\Testvideos\Output\Actor_1_L16S00_M1.wav" -i "D:\Eikholt\Testvideos\S2R4_sweep4000.wav" -filter_complex "[0] [1] afir=dry=10:wet=10 [reverb]; [0] [reverb] amix=inputs=2:weights=10 1" "D:\Eikholt\Testvideos\Output\mix.wav"
+                    '
+                    'ffmpeg -i "D:\Eikholt\Testvideos\Output\Actor_1_L16S00_M1.wav" -i "D:\Eikholt\Testvideos\S2R4_sweep4000.wav" -filter_complex "[0] [1] afir=dry=10:wet=10 [reverb]; [0] [reverb] amix=inputs=2:weights=3 1" "D:\Eikholt\Testvideos\Output\mix.wav"
+                    '
+                    '# Mixing video and audio
+                    '# https://superuser.com/questions/590201/add-audio-to-video-using-ffmpeg
+                    '
+                    'ffmpeg -i input.mp4 -i input.mp3 -c copy -map 0:v:0 -map 1:a:0 output.mp4
+                    '
+                    'ffmpeg -i "D:\Eikholt\Testvideos\Output\Actor_1_L16S00_M1_B.mp4" -i "D:\Eikholt\Testvideos\Output\mix.wav" -c copy -map 0:v:0 -map 1:a:0 "D:\Eikholt\Testvideos\Output\mix.mp4"
+                    '
+                    'ffmpeg -i "D:\Eikholt\Testvideos\Output\Actor_1_L16S00_M1_B.mp4" -i "D:\Eikholt\Testvideos\Output\mix.wav" -c:v copy -map 0:v:0 -map 1:a:0 -c:a aac -b:a 192k "D:\Eikholt\Testvideos\Output\mix.mp4"
+
+
+
+
+                    'Dim base_video_path As String = Chr(34) & "D:\Eikholt\Testvideos\Base.mp4" & Chr(34)
+
+                    'ffmpegProcessStartInfo2.Arguments =
+                    '    "-hwaccel cuda -hwaccel_output_format cuda -i " & OutputPath &
+                    '    " -hwaccel cuda -hwaccel_output_format cuda -i " & base_video_path &
+                    '    " -init_hw_device cuda -filter_complex " &
+                    '    Chr(34) & "[0:v]chromakey_cuda=0x25302D:0.1:0.12:1[overlay_video]; [1:v]scale_cuda=format=yuv420p[base]; [base][overlay_video]overlay_cuda" & Chr(34) &
+                    '    " -an -sn -c:v h264_nvenc - cq 20 " & OutputPath2
+
+                    'ffmpegProcessStartInfo2.Arguments =
+                    '    "-hwaccel cuda -hwaccel_output_format cuda -i " & OutputPath &
+                    '    " -hwaccel cuda -hwaccel_output_format cuda -i " & base_video_path &
+                    '    " -init_hw_device cuda -filter_complex " &
+                    '    Chr(34) & "[0:v]chromakey_cuda=0x25302D:0.1:0.12:1[overlay_video]; [1:v]scale_cuda=format=yuv420p[base]; [base][overlay_video]overlay_cuda" & Chr(34) &
+                    '    " " & OutputPath2
+
+
+                    'ffmpegProcessStartInfo2.Arguments =
+                    '    "-hwaccel cuda -hwaccel_output_format cuda -i " & OutputPath &
+                    '    " -hwaccel cuda -hwaccel_output_format cuda -i " & base_video_path &
+                    '    " -init_hw_device cuda -filter_complex " &
+                    '    Chr(34) & "[0:v]chromakey_cuda=0x25302D:0.1:0.12:1[overlay_video]; [1:v]scale_cuda=format=yuv420p[base]; [base][overlay_video]overlay_cuda" & Chr(34) &
+                    '    " " & OutputPath2
+
+
+                    'ffmpegProcessStartInfo2.Arguments = "-i " & OutputPath & " -vf fade=t=in:st=0:d=" & FadeDurationString & ",fade=t=out:st=" & FadeOutStartString & ":d=" & FadeDurationString & " " & OutputPath2
+
+                    If ShowProcessWindow_CheckBox.Checked = False Then
+                        ffmpegProcessStartInfo2.CreateNoWindow = True
+                    End If
+
+                    Dim sp2 = Process.Start(ffmpegProcessStartInfo2)
+                    sp2.WaitForExit()
+
+                    If sp2.ExitCode = 1 Then
+                        FailedItems.Add(InputPath & vbTab & OutputPath2 & vbTab & "Fading process failed!")
+                    End If
+
+                    sp2.Close()
+
+                End If
 
                 ProcessedItems += 1
                 UpdateProgressLabel(ProcessedItems, ExtractionData.Count)
