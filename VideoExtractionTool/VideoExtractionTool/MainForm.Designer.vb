@@ -22,162 +22,186 @@ Partial Class MainForm
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
-        Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
-        Me.Label1 = New System.Windows.Forms.Label()
-        Me.Label3 = New System.Windows.Forms.Label()
-        Me.Info_RichTextBox = New System.Windows.Forms.RichTextBox()
-        Me.ffmpegPath_TextBox = New System.Windows.Forms.TextBox()
-        Me.Data_RichTextBox = New System.Windows.Forms.RichTextBox()
-        Me.Start_Button = New System.Windows.Forms.Button()
-        Me.ShowProcessWindow_CheckBox = New System.Windows.Forms.CheckBox()
-        Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
-        Me.Process_ToolStripStatusLabel = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.TableLayoutPanel1.SuspendLayout()
-        Me.StatusStrip1.SuspendLayout()
-        Me.Panel1.SuspendLayout()
-        Me.SuspendLayout()
-        '
-        'TableLayoutPanel1
-        '
-        Me.TableLayoutPanel1.ColumnCount = 2
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 19.0!))
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 81.0!))
-        Me.TableLayoutPanel1.Controls.Add(Me.Label1, 0, 1)
-        Me.TableLayoutPanel1.Controls.Add(Me.Label3, 0, 2)
-        Me.TableLayoutPanel1.Controls.Add(Me.Info_RichTextBox, 0, 0)
-        Me.TableLayoutPanel1.Controls.Add(Me.ffmpegPath_TextBox, 1, 1)
-        Me.TableLayoutPanel1.Controls.Add(Me.Data_RichTextBox, 0, 3)
-        Me.TableLayoutPanel1.Controls.Add(Me.Start_Button, 0, 5)
-        Me.TableLayoutPanel1.Controls.Add(Me.ShowProcessWindow_CheckBox, 0, 4)
-        Me.TableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.TableLayoutPanel1.Location = New System.Drawing.Point(0, 0)
-        Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
-        Me.TableLayoutPanel1.RowCount = 6
-        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 138.0!))
-        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30.0!))
-        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20.0!))
-        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25.0!))
-        Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 67.0!))
-        Me.TableLayoutPanel1.Size = New System.Drawing.Size(807, 470)
-        Me.TableLayoutPanel1.TabIndex = 0
-        '
-        'Label1
-        '
-        Me.Label1.AutoSize = True
-        Me.Label1.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.Label1.Location = New System.Drawing.Point(3, 138)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(147, 30)
-        Me.Label1.TabIndex = 0
-        Me.Label1.Text = "ffmpeg.exe file path:"
-        Me.Label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight
-        '
-        'Label3
-        '
-        Me.Label3.AutoSize = True
-        Me.Label3.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.Label3.Location = New System.Drawing.Point(3, 168)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(147, 20)
-        Me.Label3.TabIndex = 2
-        Me.Label3.Text = "Input data"
-        Me.Label3.TextAlign = System.Drawing.ContentAlignment.BottomLeft
-        '
-        'Info_RichTextBox
-        '
-        Me.TableLayoutPanel1.SetColumnSpan(Me.Info_RichTextBox, 2)
-        Me.Info_RichTextBox.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.Info_RichTextBox.Location = New System.Drawing.Point(3, 3)
-        Me.Info_RichTextBox.Name = "Info_RichTextBox"
-        Me.Info_RichTextBox.ReadOnly = True
-        Me.Info_RichTextBox.Size = New System.Drawing.Size(801, 132)
-        Me.Info_RichTextBox.TabIndex = 4
-        Me.Info_RichTextBox.Text = resources.GetString("Info_RichTextBox.Text")
-        '
-        'ffmpegPath_TextBox
-        '
-        Me.ffmpegPath_TextBox.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.ffmpegPath_TextBox.Location = New System.Drawing.Point(156, 141)
-        Me.ffmpegPath_TextBox.Name = "ffmpegPath_TextBox"
-        Me.ffmpegPath_TextBox.Size = New System.Drawing.Size(648, 23)
-        Me.ffmpegPath_TextBox.TabIndex = 5
-        '
-        'Data_RichTextBox
-        '
-        Me.TableLayoutPanel1.SetColumnSpan(Me.Data_RichTextBox, 2)
-        Me.Data_RichTextBox.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.Data_RichTextBox.Location = New System.Drawing.Point(3, 191)
-        Me.Data_RichTextBox.Name = "Data_RichTextBox"
-        Me.Data_RichTextBox.Size = New System.Drawing.Size(801, 184)
-        Me.Data_RichTextBox.TabIndex = 6
-        Me.Data_RichTextBox.Text = ""
-        '
-        'Start_Button
-        '
-        Me.TableLayoutPanel1.SetColumnSpan(Me.Start_Button, 2)
-        Me.Start_Button.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.Start_Button.Location = New System.Drawing.Point(3, 406)
-        Me.Start_Button.Name = "Start_Button"
-        Me.Start_Button.Size = New System.Drawing.Size(801, 61)
-        Me.Start_Button.TabIndex = 7
-        Me.Start_Button.Text = "Start extraction process"
-        Me.Start_Button.UseVisualStyleBackColor = True
-        '
-        'ShowProcessWindow_CheckBox
-        '
-        Me.ShowProcessWindow_CheckBox.AutoSize = True
-        Me.ShowProcessWindow_CheckBox.Location = New System.Drawing.Point(3, 381)
-        Me.ShowProcessWindow_CheckBox.Name = "ShowProcessWindow_CheckBox"
-        Me.ShowProcessWindow_CheckBox.Size = New System.Drawing.Size(143, 19)
-        Me.ShowProcessWindow_CheckBox.TabIndex = 8
-        Me.ShowProcessWindow_CheckBox.Text = "Show process window"
-        Me.ShowProcessWindow_CheckBox.UseVisualStyleBackColor = True
-        '
-        'StatusStrip1
-        '
-        Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.Process_ToolStripStatusLabel})
-        Me.StatusStrip1.Location = New System.Drawing.Point(0, 470)
-        Me.StatusStrip1.Name = "StatusStrip1"
-        Me.StatusStrip1.RightToLeft = System.Windows.Forms.RightToLeft.Yes
-        Me.StatusStrip1.Size = New System.Drawing.Size(807, 22)
-        Me.StatusStrip1.TabIndex = 1
-        Me.StatusStrip1.Text = "Idle"
-        '
-        'Process_ToolStripStatusLabel
-        '
-        Me.Process_ToolStripStatusLabel.Name = "Process_ToolStripStatusLabel"
-        Me.Process_ToolStripStatusLabel.Size = New System.Drawing.Size(26, 17)
-        Me.Process_ToolStripStatusLabel.Text = "Idle"
-        '
-        'Panel1
-        '
-        Me.Panel1.Controls.Add(Me.TableLayoutPanel1)
-        Me.Panel1.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.Panel1.Location = New System.Drawing.Point(0, 0)
-        Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(807, 470)
-        Me.Panel1.TabIndex = 2
-        '
-        'MainForm
-        '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
-        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(807, 492)
-        Me.Controls.Add(Me.Panel1)
-        Me.Controls.Add(Me.StatusStrip1)
-        Me.Name = "MainForm"
-        Me.Text = "Video extraction tool"
-        Me.TableLayoutPanel1.ResumeLayout(False)
-        Me.TableLayoutPanel1.PerformLayout()
-        Me.StatusStrip1.ResumeLayout(False)
-        Me.StatusStrip1.PerformLayout()
-        Me.Panel1.ResumeLayout(False)
-        Me.ResumeLayout(False)
-        Me.PerformLayout()
-
+        Dim resources As ComponentModel.ComponentResourceManager = New ComponentModel.ComponentResourceManager(GetType(MainForm))
+        TableLayoutPanel1 = New TableLayoutPanel()
+        Label1 = New Label()
+        Label3 = New Label()
+        Info_RichTextBox = New RichTextBox()
+        ffmpegPath_TextBox = New TextBox()
+        Data_RichTextBox = New RichTextBox()
+        Start_Button = New Button()
+        ShowProcessWindow_CheckBox = New CheckBox()
+        Label2 = New Label()
+        ffprobePath_TextBox = New TextBox()
+        StatusStrip1 = New StatusStrip()
+        Process_ToolStripStatusLabel = New ToolStripStatusLabel()
+        Panel1 = New Panel()
+        TableLayoutPanel1.SuspendLayout()
+        StatusStrip1.SuspendLayout()
+        Panel1.SuspendLayout()
+        SuspendLayout()
+        ' 
+        ' TableLayoutPanel1
+        ' 
+        TableLayoutPanel1.ColumnCount = 2
+        TableLayoutPanel1.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 19F))
+        TableLayoutPanel1.ColumnStyles.Add(New ColumnStyle(SizeType.Percent, 81F))
+        TableLayoutPanel1.Controls.Add(Label1, 0, 1)
+        TableLayoutPanel1.Controls.Add(Label3, 0, 3)
+        TableLayoutPanel1.Controls.Add(Info_RichTextBox, 0, 0)
+        TableLayoutPanel1.Controls.Add(ffmpegPath_TextBox, 1, 1)
+        TableLayoutPanel1.Controls.Add(Data_RichTextBox, 0, 4)
+        TableLayoutPanel1.Controls.Add(Start_Button, 0, 6)
+        TableLayoutPanel1.Controls.Add(ShowProcessWindow_CheckBox, 0, 5)
+        TableLayoutPanel1.Controls.Add(Label2, 0, 2)
+        TableLayoutPanel1.Controls.Add(ffprobePath_TextBox, 1, 2)
+        TableLayoutPanel1.Dock = DockStyle.Fill
+        TableLayoutPanel1.Location = New Point(0, 0)
+        TableLayoutPanel1.Name = "TableLayoutPanel1"
+        TableLayoutPanel1.RowCount = 7
+        TableLayoutPanel1.RowStyles.Add(New RowStyle(SizeType.Absolute, 138F))
+        TableLayoutPanel1.RowStyles.Add(New RowStyle(SizeType.Absolute, 30F))
+        TableLayoutPanel1.RowStyles.Add(New RowStyle(SizeType.Absolute, 30F))
+        TableLayoutPanel1.RowStyles.Add(New RowStyle(SizeType.Absolute, 20F))
+        TableLayoutPanel1.RowStyles.Add(New RowStyle(SizeType.Percent, 100F))
+        TableLayoutPanel1.RowStyles.Add(New RowStyle(SizeType.Absolute, 25F))
+        TableLayoutPanel1.RowStyles.Add(New RowStyle(SizeType.Absolute, 67F))
+        TableLayoutPanel1.RowStyles.Add(New RowStyle(SizeType.Absolute, 20F))
+        TableLayoutPanel1.Size = New Size(807, 470)
+        TableLayoutPanel1.TabIndex = 0
+        ' 
+        ' Label1
+        ' 
+        Label1.AutoSize = True
+        Label1.Dock = DockStyle.Fill
+        Label1.Location = New Point(3, 138)
+        Label1.Name = "Label1"
+        Label1.Size = New Size(147, 30)
+        Label1.TabIndex = 0
+        Label1.Text = "ffmpeg.exe file path:"
+        Label1.TextAlign = ContentAlignment.MiddleRight
+        ' 
+        ' Label3
+        ' 
+        Label3.AutoSize = True
+        Label3.Dock = DockStyle.Fill
+        Label3.Location = New Point(3, 198)
+        Label3.Name = "Label3"
+        Label3.Size = New Size(147, 20)
+        Label3.TabIndex = 2
+        Label3.Text = "Input data"
+        Label3.TextAlign = ContentAlignment.BottomLeft
+        ' 
+        ' Info_RichTextBox
+        ' 
+        TableLayoutPanel1.SetColumnSpan(Info_RichTextBox, 2)
+        Info_RichTextBox.Dock = DockStyle.Fill
+        Info_RichTextBox.Location = New Point(3, 3)
+        Info_RichTextBox.Name = "Info_RichTextBox"
+        Info_RichTextBox.ReadOnly = True
+        Info_RichTextBox.Size = New Size(801, 132)
+        Info_RichTextBox.TabIndex = 4
+        Info_RichTextBox.Text = resources.GetString("Info_RichTextBox.Text")
+        ' 
+        ' ffmpegPath_TextBox
+        ' 
+        ffmpegPath_TextBox.Dock = DockStyle.Fill
+        ffmpegPath_TextBox.Location = New Point(156, 141)
+        ffmpegPath_TextBox.Name = "ffmpegPath_TextBox"
+        ffmpegPath_TextBox.Size = New Size(648, 23)
+        ffmpegPath_TextBox.TabIndex = 5
+        ' 
+        ' Data_RichTextBox
+        ' 
+        TableLayoutPanel1.SetColumnSpan(Data_RichTextBox, 2)
+        Data_RichTextBox.Dock = DockStyle.Fill
+        Data_RichTextBox.Location = New Point(3, 221)
+        Data_RichTextBox.Name = "Data_RichTextBox"
+        Data_RichTextBox.Size = New Size(801, 154)
+        Data_RichTextBox.TabIndex = 6
+        Data_RichTextBox.Text = ""
+        ' 
+        ' Start_Button
+        ' 
+        TableLayoutPanel1.SetColumnSpan(Start_Button, 2)
+        Start_Button.Dock = DockStyle.Fill
+        Start_Button.Location = New Point(3, 406)
+        Start_Button.Name = "Start_Button"
+        Start_Button.Size = New Size(801, 61)
+        Start_Button.TabIndex = 7
+        Start_Button.Text = "Start extraction process"
+        Start_Button.UseVisualStyleBackColor = True
+        ' 
+        ' ShowProcessWindow_CheckBox
+        ' 
+        ShowProcessWindow_CheckBox.AutoSize = True
+        ShowProcessWindow_CheckBox.Location = New Point(3, 381)
+        ShowProcessWindow_CheckBox.Name = "ShowProcessWindow_CheckBox"
+        ShowProcessWindow_CheckBox.Size = New Size(143, 19)
+        ShowProcessWindow_CheckBox.TabIndex = 8
+        ShowProcessWindow_CheckBox.Text = "Show process window"
+        ShowProcessWindow_CheckBox.UseVisualStyleBackColor = True
+        ' 
+        ' Label2
+        ' 
+        Label2.AutoSize = True
+        Label2.Dock = DockStyle.Fill
+        Label2.Location = New Point(3, 168)
+        Label2.Name = "Label2"
+        Label2.Size = New Size(147, 30)
+        Label2.TabIndex = 9
+        Label2.Text = "ffprobe.exe file path:"
+        Label2.TextAlign = ContentAlignment.MiddleRight
+        ' 
+        ' ffprobePath_TextBox
+        ' 
+        ffprobePath_TextBox.Dock = DockStyle.Fill
+        ffprobePath_TextBox.Location = New Point(156, 171)
+        ffprobePath_TextBox.Name = "ffprobePath_TextBox"
+        ffprobePath_TextBox.Size = New Size(648, 23)
+        ffprobePath_TextBox.TabIndex = 10
+        ' 
+        ' StatusStrip1
+        ' 
+        StatusStrip1.Items.AddRange(New ToolStripItem() {Process_ToolStripStatusLabel})
+        StatusStrip1.Location = New Point(0, 470)
+        StatusStrip1.Name = "StatusStrip1"
+        StatusStrip1.RightToLeft = RightToLeft.Yes
+        StatusStrip1.Size = New Size(807, 22)
+        StatusStrip1.TabIndex = 1
+        StatusStrip1.Text = "Idle"
+        ' 
+        ' Process_ToolStripStatusLabel
+        ' 
+        Process_ToolStripStatusLabel.Name = "Process_ToolStripStatusLabel"
+        Process_ToolStripStatusLabel.Size = New Size(26, 17)
+        Process_ToolStripStatusLabel.Text = "Idle"
+        ' 
+        ' Panel1
+        ' 
+        Panel1.Controls.Add(TableLayoutPanel1)
+        Panel1.Dock = DockStyle.Fill
+        Panel1.Location = New Point(0, 0)
+        Panel1.Name = "Panel1"
+        Panel1.Size = New Size(807, 470)
+        Panel1.TabIndex = 2
+        ' 
+        ' MainForm
+        ' 
+        AutoScaleDimensions = New SizeF(7F, 15F)
+        AutoScaleMode = AutoScaleMode.Font
+        ClientSize = New Size(807, 492)
+        Controls.Add(Panel1)
+        Controls.Add(StatusStrip1)
+        Name = "MainForm"
+        Text = "Video extraction tool"
+        TableLayoutPanel1.ResumeLayout(False)
+        TableLayoutPanel1.PerformLayout()
+        StatusStrip1.ResumeLayout(False)
+        StatusStrip1.PerformLayout()
+        Panel1.ResumeLayout(False)
+        ResumeLayout(False)
+        PerformLayout()
     End Sub
 
     Friend WithEvents TableLayoutPanel1 As TableLayoutPanel
@@ -191,4 +215,6 @@ Partial Class MainForm
     Friend WithEvents Panel1 As Panel
     Friend WithEvents Process_ToolStripStatusLabel As ToolStripStatusLabel
     Friend WithEvents ShowProcessWindow_CheckBox As CheckBox
+    Friend WithEvents Label2 As Label
+    Friend WithEvents ffprobePath_TextBox As TextBox
 End Class

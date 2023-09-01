@@ -59,7 +59,7 @@
   </resheader>
   <data name="Info_RichTextBox.Text" xml:space="preserve">
     <value>This software is a simple wrapper for the stream copy function in ffmpeg.
-You need to download the ffmpeg executive yourself and indicate below its file path in the textbox below.
+You need to download the ffmpeg and ffprobe executives yourself and indicate below their file paths in the textboxes below.
 In the input data field below you should enter (copy/paste) four tab-delimited columns containing:
 
      full input file path, full output file path, start time (seconds), and duration (seconds)
