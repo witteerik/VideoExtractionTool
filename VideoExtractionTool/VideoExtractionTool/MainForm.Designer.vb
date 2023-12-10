@@ -36,9 +36,12 @@ Partial Class MainForm
         StatusStrip1 = New StatusStrip()
         Process_ToolStripStatusLabel = New ToolStripStatusLabel()
         Panel1 = New Panel()
+        MenuStrip1 = New MenuStrip()
+        CustomToolsToolStripMenuItem = New ToolStripMenuItem()
         TableLayoutPanel1.SuspendLayout()
         StatusStrip1.SuspendLayout()
         Panel1.SuspendLayout()
+        MenuStrip1.SuspendLayout()
         SuspendLayout()
         ' 
         ' TableLayoutPanel1
@@ -67,7 +70,7 @@ Partial Class MainForm
         TableLayoutPanel1.RowStyles.Add(New RowStyle(SizeType.Absolute, 25F))
         TableLayoutPanel1.RowStyles.Add(New RowStyle(SizeType.Absolute, 67F))
         TableLayoutPanel1.RowStyles.Add(New RowStyle(SizeType.Absolute, 20F))
-        TableLayoutPanel1.Size = New Size(807, 470)
+        TableLayoutPanel1.Size = New Size(807, 446)
         TableLayoutPanel1.TabIndex = 0
         ' 
         ' Label1
@@ -117,7 +120,7 @@ Partial Class MainForm
         Data_RichTextBox.Dock = DockStyle.Fill
         Data_RichTextBox.Location = New Point(3, 221)
         Data_RichTextBox.Name = "Data_RichTextBox"
-        Data_RichTextBox.Size = New Size(801, 154)
+        Data_RichTextBox.Size = New Size(801, 130)
         Data_RichTextBox.TabIndex = 6
         Data_RichTextBox.Text = ""
         ' 
@@ -125,7 +128,7 @@ Partial Class MainForm
         ' 
         TableLayoutPanel1.SetColumnSpan(Start_Button, 2)
         Start_Button.Dock = DockStyle.Fill
-        Start_Button.Location = New Point(3, 406)
+        Start_Button.Location = New Point(3, 382)
         Start_Button.Name = "Start_Button"
         Start_Button.Size = New Size(801, 61)
         Start_Button.TabIndex = 7
@@ -135,7 +138,7 @@ Partial Class MainForm
         ' ShowProcessWindow_CheckBox
         ' 
         ShowProcessWindow_CheckBox.AutoSize = True
-        ShowProcessWindow_CheckBox.Location = New Point(3, 381)
+        ShowProcessWindow_CheckBox.Location = New Point(3, 357)
         ShowProcessWindow_CheckBox.Name = "ShowProcessWindow_CheckBox"
         ShowProcessWindow_CheckBox.Size = New Size(143, 19)
         ShowProcessWindow_CheckBox.TabIndex = 8
@@ -181,10 +184,25 @@ Partial Class MainForm
         ' 
         Panel1.Controls.Add(TableLayoutPanel1)
         Panel1.Dock = DockStyle.Fill
-        Panel1.Location = New Point(0, 0)
+        Panel1.Location = New Point(0, 24)
         Panel1.Name = "Panel1"
-        Panel1.Size = New Size(807, 470)
+        Panel1.Size = New Size(807, 446)
         Panel1.TabIndex = 2
+        ' 
+        ' MenuStrip1
+        ' 
+        MenuStrip1.Items.AddRange(New ToolStripItem() {CustomToolsToolStripMenuItem})
+        MenuStrip1.Location = New Point(0, 0)
+        MenuStrip1.Name = "MenuStrip1"
+        MenuStrip1.Size = New Size(807, 24)
+        MenuStrip1.TabIndex = 3
+        MenuStrip1.Text = "MenuStrip1"
+        ' 
+        ' CustomToolsToolStripMenuItem
+        ' 
+        CustomToolsToolStripMenuItem.Name = "CustomToolsToolStripMenuItem"
+        CustomToolsToolStripMenuItem.Size = New Size(90, 20)
+        CustomToolsToolStripMenuItem.Text = "Custom tools"
         ' 
         ' MainForm
         ' 
@@ -193,6 +211,8 @@ Partial Class MainForm
         ClientSize = New Size(807, 492)
         Controls.Add(Panel1)
         Controls.Add(StatusStrip1)
+        Controls.Add(MenuStrip1)
+        MainMenuStrip = MenuStrip1
         Name = "MainForm"
         Text = "Video extraction tool"
         TableLayoutPanel1.ResumeLayout(False)
@@ -200,6 +220,8 @@ Partial Class MainForm
         StatusStrip1.ResumeLayout(False)
         StatusStrip1.PerformLayout()
         Panel1.ResumeLayout(False)
+        MenuStrip1.ResumeLayout(False)
+        MenuStrip1.PerformLayout()
         ResumeLayout(False)
         PerformLayout()
     End Sub
@@ -217,4 +239,6 @@ Partial Class MainForm
     Friend WithEvents ShowProcessWindow_CheckBox As CheckBox
     Friend WithEvents Label2 As Label
     Friend WithEvents ffprobePath_TextBox As TextBox
+    Friend WithEvents MenuStrip1 As MenuStrip
+    Friend WithEvents CustomToolsToolStripMenuItem As ToolStripMenuItem
 End Class

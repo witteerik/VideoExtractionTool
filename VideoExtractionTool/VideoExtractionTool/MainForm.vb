@@ -1,4 +1,5 @@
 ﻿Imports System.Globalization
+Imports SpeechTestFramework.Audio.Sound.SpeechMaterialAnnotation
 
 
 Public Class MainForm
@@ -9,6 +10,8 @@ Public Class MainForm
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         SetStartButtonLook(StartButtonLooks.Start)
+
+        SpeechTestFramework.OstfBase.UseOptimizationLibraries = False
 
     End Sub
 
@@ -34,7 +37,8 @@ Public Class MainForm
 
                 Dim InputPath = ExtractionVideo.Item1
                 Dim VideoOutputPath = ExtractionVideo.Item2
-                Dim VideoOutputPath2 = IO.Path.Combine(IO.Path.GetDirectoryName(VideoOutputPath), IO.Path.GetFileNameWithoutExtension(ExtractionVideo.Item2) & "_Mix.mp4")
+                Dim VideoOutputPath2 = IO.Path.Combine(IO.Path.GetDirectoryName(VideoOutputPath), "Mixed", IO.Path.GetFileNameWithoutExtension(ExtractionVideo.Item2) & ".mp4")
+                If IO.Directory.Exists(IO.Path.GetDirectoryName(VideoOutputPath2)) = False Then IO.Directory.CreateDirectory(IO.Path.GetDirectoryName(VideoOutputPath2))
                 Dim VideoStartReadTime = ExtractionVideo.Item3
                 Dim VideoReadDuration = ExtractionVideo.Item4
 
@@ -58,12 +62,21 @@ Public Class MainForm
                 Dim AudioReadDuration As Double
                 Dim AudioOutputInitialPadding As Double
                 Dim AudioOutputFinalPadding As Double
+
+                Dim SoundLevel As Double
+                Dim IntegrationTime As Double
+                Dim FrequencyWeighting As SpeechTestFramework.Audio.FrequencyWeightings
+
                 If ExtractionVideo.Rest IsNot Nothing Then
                     AudioReadDuration = ExtractionVideo.Rest.Item1
                     AudioOutputInitialPadding = ExtractionVideo.Rest.Item2
                     AudioOutputFinalPadding = ExtractionVideo.Rest.Item3
-                End If
 
+                    SoundLevel = ExtractionVideo.Rest.Item4
+                    IntegrationTime = ExtractionVideo.Rest.Item5
+                    FrequencyWeighting = ExtractionVideo.Rest.Item6
+
+                End If
 
                 'Creating the output folder
                 IO.Directory.CreateDirectory(IO.Path.GetDirectoryName(VideoOutputPath))
@@ -130,7 +143,9 @@ Public Class MainForm
 
                     '-ss 1 -t 8 -i D:\Eikholt\Testvideos\Noise.wav -filter_complex "[0:a]afade=duration=0.5,areverse,afade=duration=0.5,apad=pad_dur=1,areverse,apad=pad_dur=1[out_a]" -map "[out_a]" out11.wav
 
-                    ffmpegProcessStartInfo3.Arguments = "-ss " & AudioStartTimeString & " -to " & AudioTo_String & " -i " & AudioInputFile & " -filter_complex " & Chr(34) & "[0:a]afade=duration=0.01,areverse,afade=duration=0.01,apad=pad_dur=" & AudioOutputInitialPaddingString & ",areverse,apad=pad_dur=" & AudioOutputFinalPaddingString & "[out_a]" & Chr(34) & " -map " & Chr(34) & "[out_a]" & Chr(34) & " " & AudioOutputFile
+                    'ffmpegProcessStartInfo3.Arguments = "-ss " & AudioStartTimeString & " -to " & AudioTo_String & " -i " & AudioInputFile & " -filter_complex " & Chr(34) & "[0:a]afade=duration=0.01,areverse,afade=duration=0.01,apad=pad_dur=" & AudioOutputInitialPaddingString & ",areverse,apad=pad_dur=" & AudioOutputFinalPaddingString & "[out_a]" & Chr(34) & " -map " & Chr(34) & "[out_a]" & Chr(34) & " " & AudioOutputFile
+
+                    ffmpegProcessStartInfo3.Arguments = "-ss " & AudioStartTimeString & " -to " & AudioTo_String & " -i " & AudioInputFile & " -vn -c:a pcm_f32le " & AudioOutputFile
 
                     If ShowProcessWindow_CheckBox.Checked = False Then
                         ffmpegProcessStartInfo3.CreateNoWindow = True
@@ -152,7 +167,7 @@ Public Class MainForm
 
                         Dim SyncedAudioFile As String = AudioOutputFile
 
-                        SyncSounds(DumpSoundFile, AudioOutputFile, SyncedAudioFile)
+                        SyncSounds(DumpSoundFile, AudioOutputFile, SyncedAudioFile, SoundLevel, IntegrationTime, FrequencyWeighting)
 
                         'Replacing the sound in the initial video
 
@@ -331,7 +346,7 @@ Public Class MainForm
 
     End Sub
 
-    Private Function ParseInputData() As List(Of Tuple(Of String, String, Double, Double, String, String, Double?, Tuple(Of Double?, Double?, Double?)))
+    Private Function ParseInputData() As List(Of Tuple(Of String, String, Double, Double, String, String, Double?, Tuple(Of Double?, Double?, Double?, Double?, Double?, SpeechTestFramework.Audio.BasicAudioEnums.FrequencyWeightings?)))
 
         'Checking that the ffmpeg.exe file exists
         ffmpegPath = ffmpegPath_TextBox.Text.Trim
@@ -359,7 +374,7 @@ Public Class MainForm
         End If
 
         'Getting data
-        Dim ExtractionData As New List(Of Tuple(Of String, String, Double, Double, String, String, Double?, Tuple(Of Double?, Double?, Double?)))
+        Dim ExtractionData As New List(Of Tuple(Of String, String, Double, Double, String, String, Double?, Tuple(Of Double?, Double?, Double?, Double?, Double?, SpeechTestFramework.Audio.BasicAudioEnums.FrequencyWeightings?)))
 
         Dim VideoOutputCheckList As New SortedSet(Of String)
         Dim AudioOutputCheckList As New SortedSet(Of String)
@@ -374,8 +389,8 @@ Public Class MainForm
             'Checking that there are four tab-delimited items on the line
             Dim LineCols = DataLine.Trim.Split(vbTab)
             If LineCols.Length <> 4 Then
-                If LineCols.Length <> 9 Then
-                    MsgBox("The following line does not have four or nine tab-delimited values (as required)!" & vbCrLf & vbCrLf & DataLine, MsgBoxStyle.Exclamation, "Video Extraction Tool")
+                If LineCols.Length <> 12 Then
+                    MsgBox("The following line does not have four or twelve tab-delimited values (as required)!" & vbCrLf & vbCrLf & DataLine, MsgBoxStyle.Exclamation, "Video Extraction Tool")
                     Return Nothing
                 End If
             End If
@@ -421,10 +436,17 @@ Public Class MainForm
             Dim AudioDurationString As String = ""
             Dim AudioOutputInitialPaddingString As String = ""
             Dim AudioOutputFinalPaddingString As String = ""
+            Dim SoundLevelString As String = ""
+            Dim TemporalIntegrationString As String = ""
+            Dim FrequencyWeightingString As String = ""
+
             Dim AudioStartTime As Double
             Dim AudioDuration As Double
             Dim AudioOutputInitialPadding As Double
             Dim AudioOutputFinalPadding As Double
+            Dim SoundLevel As Double
+            Dim TemporalIntegrationTime As Double
+            Dim FrequencyWeighting As SpeechTestFramework.Audio.FrequencyWeightings = SpeechTestFramework.Audio.BasicAudioEnums.FrequencyWeightings.Z
 
             If LineCols.Length > 4 Then
 
@@ -433,11 +455,15 @@ Public Class MainForm
                 AudioDurationString = LineCols(6).Trim
                 AudioOutputInitialPaddingString = LineCols(7).Trim
                 AudioOutputFinalPaddingString = LineCols(8).Trim
+                SoundLevelString = LineCols(9).Trim
+                TemporalIntegrationString = LineCols(10).Trim
+                FrequencyWeightingString = LineCols(11).Trim
+
                 AudioOutputPath = IO.Path.Combine(IO.Path.GetDirectoryName(VideoOutputPath), IO.Path.GetFileNameWithoutExtension(VideoOutputPath) & ".wav")
 
                 'Parsing and checking values
                 If IO.File.Exists(AudioInputPath) = False Then
-                    MsgBox("The input file indicated on the following line does not exist!" & vbCrLf & vbCrLf & DataLine, MsgBoxStyle.Exclamation, "Audio Extraction Tool")
+                    MsgBox("The audio input file indicated on the following line does not exist!" & vbCrLf & vbCrLf & DataLine, MsgBoxStyle.Exclamation, "Audio Extraction Tool")
                     Return Nothing
                 End If
                 If Double.TryParse(AudioStartTimeString.Replace(",", "."), NumberStyles.Float, CultureInfo.InvariantCulture, AudioStartTime) = False Then
@@ -456,6 +482,31 @@ Public Class MainForm
                     MsgBox("Unable to parse the audio final padding on the following line!" & vbCrLf & vbCrLf & DataLine, MsgBoxStyle.Exclamation, "Audio Extraction Tool")
                     Return Nothing
                 End If
+                If Double.TryParse(SoundLevelString.Replace(",", "."), NumberStyles.Float, CultureInfo.InvariantCulture, SoundLevel) = False Then
+                    MsgBox("Unable to parse the audio sound level on the following line!" & vbCrLf & vbCrLf & DataLine, MsgBoxStyle.Exclamation, "Audio Extraction Tool")
+                    Return Nothing
+                End If
+
+                If Double.TryParse(TemporalIntegrationString.Replace(",", "."), NumberStyles.Float, CultureInfo.InvariantCulture, TemporalIntegrationTime) = False Then
+                    MsgBox("Unable to parse the temporal integration time on the following line!" & vbCrLf & vbCrLf & DataLine, MsgBoxStyle.Exclamation, "Video Extraction Tool")
+                    Return Nothing
+                Else
+                    TemporalIntegrationTime /= 1000 ' Converting from ms to seconds
+                End If
+
+                Select Case FrequencyWeightingString
+                    Case "", "Z"
+                        FrequencyWeighting = SpeechTestFramework.Audio.BasicAudioEnums.FrequencyWeightings.Z
+                    Case "C"
+                        FrequencyWeighting = SpeechTestFramework.Audio.BasicAudioEnums.FrequencyWeightings.C
+                    Case "RLB"
+                        FrequencyWeighting = SpeechTestFramework.Audio.BasicAudioEnums.FrequencyWeightings.RLB
+                    Case "K"
+                        FrequencyWeightingString = SpeechTestFramework.Audio.BasicAudioEnums.FrequencyWeightings.K
+                    Case Else
+                        MsgBox("The frequency weighting " & FrequencyWeightingString & " specified on the following line is not supported!" & vbCrLf & vbCrLf & DataLine, MsgBoxStyle.Exclamation, "Video Extraction Tool")
+                        Return Nothing
+                End Select
 
                 'Checks that Audio output files are unique
                 If AudioOutputCheckList.Contains(AudioOutputPath) Then
@@ -474,7 +525,8 @@ Public Class MainForm
 
             End If
 
-            ExtractionData.Add(New Tuple(Of String, String, Double, Double, String, String, Double?, Tuple(Of Double?, Double?, Double?))(VideoInputPath, VideoOutputPath, VideoStartTime, VideoDuration, AudioInputPath, AudioOutputPath, AudioStartTime, New Tuple(Of Double?, Double?, Double?)(AudioDuration, AudioOutputInitialPadding, AudioOutputFinalPadding)))
+            ExtractionData.Add(New Tuple(Of String, String, Double, Double, String, String, Double?, Tuple(Of Double?, Double?, Double?, Double?, Double?, SpeechTestFramework.Audio.BasicAudioEnums.FrequencyWeightings?))(VideoInputPath, VideoOutputPath, VideoStartTime, VideoDuration, AudioInputPath, AudioOutputPath, AudioStartTime,
+                                                                                                                                          New Tuple(Of Double?, Double?, Double?, Double?, Double?, SpeechTestFramework.Audio.BasicAudioEnums.FrequencyWeightings?)(AudioDuration, AudioOutputInitialPadding, AudioOutputFinalPadding, SoundLevel, TemporalIntegrationTime, FrequencyWeighting)))
 
         Next
 
@@ -545,7 +597,7 @@ Public Class MainForm
         ffmpegProcessStartInfo.RedirectStandardOutput = True
         ffmpegProcessStartInfo.FileName = ffmpegPath
 
-        ffmpegProcessStartInfo.Arguments = "-i " & VideoFile & " " & OutputFile2
+        ffmpegProcessStartInfo.Arguments = "-i " & VideoFile & " -vn -c:a pcm_f32le " & OutputFile2
 
         If ShowProcessWindow_CheckBox.Checked = False Then
             ffmpegProcessStartInfo.CreateNoWindow = True
@@ -569,99 +621,157 @@ Public Class MainForm
 
     End Function
 
-    Private Function SyncSounds(ByVal VideoDumpFile As String, ByVal NewSoundFile As String, ByVal SyncedSoundFile As String) As Boolean
+    Private Function SyncSounds(ByVal VideoDumpFile As String, ByVal NewSoundFile As String, ByVal SyncedSoundFile As String, ByVal TargetSoundLevel As Double, ByVal TemporalIntegration As Double, ByVal FrequencyWeighting As SpeechTestFramework.Audio.FrequencyWeightings) As Boolean
 
-        Dim VideoDump As SpeechTestFramework.Audio.Sound = SpeechTestFramework.Audio.AudioIOs.LoadWaveFile(VideoDumpFile)
+        Try
 
-        Dim NewSound As SpeechTestFramework.Audio.Sound = SpeechTestFramework.Audio.AudioIOs.LoadWaveFile(NewSoundFile)
+            Dim VideoDump As SpeechTestFramework.Audio.Sound = SpeechTestFramework.Audio.AudioIOs.LoadWaveFile(VideoDumpFile)
 
-        SpeechTestFramework.Audio.DSP.MaxAmplitudeNormalizeSection(VideoDump)
-        SpeechTestFramework.Audio.DSP.MaxAmplitudeNormalizeSection(NewSound)
+            'Changing to Ieee float format
+            Dim TempVideoDump = New SpeechTestFramework.Audio.Sound(New SpeechTestFramework.Audio.Formats.WaveFormat(VideoDump.WaveFormat.SampleRate, VideoDump.WaveFormat.BitDepth, VideoDump.WaveFormat.Channels, , SpeechTestFramework.Audio.Formats.WaveFormat.WaveFormatEncodings.IeeeFloatingPoints))
+            For c = 1 To TempVideoDump.WaveFormat.Channels
+                TempVideoDump.WaveData.SampleData(c) = VideoDump.WaveData.SampleData(c)
+            Next
+            VideoDump = TempVideoDump
 
-        Dim DumpEnvelope = SpeechTestFramework.Audio.DSP.GetEnvelope(VideoDump, 1, Math.Round(VideoDump.WaveFormat.SampleRate / 100))
-        Dim NewSoundEnvelope = SpeechTestFramework.Audio.DSP.GetEnvelope(NewSound, 1, Math.Round(NewSound.WaveFormat.SampleRate / 100))
+            Dim DumpSoundLength = VideoDump.WaveData.SampleData(1).Length
 
-        'replacing negative infinity values
-        Dim NewSoundMin As Double = Double.PositiveInfinity
-        For Each value In NewSoundEnvelope
-            If Double.IsNegativeInfinity(value) = False Then
-                NewSoundMin = Math.Min(NewSoundMin, value)
-            End If
-        Next
-        For n = 0 To NewSoundEnvelope.Count - 1
-            If Double.IsNegativeInfinity(NewSoundEnvelope(n)) Then NewSoundEnvelope(n) = NewSoundMin
-        Next
+            Dim NewSound As SpeechTestFramework.Audio.Sound = SpeechTestFramework.Audio.AudioIOs.LoadWaveFile(NewSoundFile)
+            Dim TempNewSound = New SpeechTestFramework.Audio.Sound(New SpeechTestFramework.Audio.Formats.WaveFormat(NewSound.WaveFormat.SampleRate, NewSound.WaveFormat.BitDepth, NewSound.WaveFormat.Channels, , SpeechTestFramework.Audio.Formats.WaveFormat.WaveFormatEncodings.IeeeFloatingPoints))
+            For c = 1 To TempNewSound.WaveFormat.Channels
+                TempNewSound.WaveData.SampleData(c) = NewSound.WaveData.SampleData(c)
+            Next
+            NewSound = TempNewSound
 
-        Dim DumpEnvelopeMin As Double = Double.PositiveInfinity
-        For Each value In DumpEnvelope
-            If Double.IsNegativeInfinity(value) = False Then
-                DumpEnvelopeMin = Math.Min(DumpEnvelopeMin, value)
-            End If
-        Next
-        For n = 0 To DumpEnvelope.Count - 1
-            If Double.IsNegativeInfinity(DumpEnvelope(n)) Then DumpEnvelope(n) = DumpEnvelopeMin
-        Next
+            ''Fading very slightly
+            'If NewSound.WaveData.SampleData(1).Length > 200 Then
+            '    SpeechTestFramework.Audio.DSP.Fade(NewSound, Nothing, 0,, 0, 20)
+            '    SpeechTestFramework.Audio.DSP.Fade(NewSound, 0, Nothing,, -20)
+            'End If
 
-        'Shifting
-        For n = 0 To DumpEnvelope.Count - 1
-            DumpEnvelope(n) -= DumpEnvelopeMin
-        Next
-        For n = 0 To NewSoundEnvelope.Count - 1
-            NewSoundEnvelope(n) -= NewSoundMin
-        Next
-
-        'Normalizing (into Lists of Single)
-        Dim DumpEnvelopeSingle As New List(Of Single)
-        Dim NewSoundEnvelopeSingle As New List(Of Single)
-        Dim DumpEnvelopeMax As Double = DumpEnvelope.Max
-        Dim NewSoundMax As Double = NewSoundEnvelope.Max
-        For n = 0 To DumpEnvelope.Count - 1
-            DumpEnvelopeSingle.Add(DumpEnvelope(n) / DumpEnvelopeMax)
-        Next
-        For n = 0 To NewSoundEnvelope.Count - 1
-            NewSoundEnvelopeSingle.Add(NewSoundEnvelope(n) / NewSoundMax)
-        Next
-
-        'Padding with zeros
-        For i = 0 To NewSoundEnvelope.Count - 1
-            DumpEnvelopeSingle.Insert(0, 0)
-            DumpEnvelopeSingle.Add(0)
-        Next
-
-        Dim ResultList As New List(Of Double)
-        Dim NewSoundArray As Single() = NewSoundEnvelopeSingle.ToArray()
-        For i = 0 To DumpEnvelopeSingle.Count - NewSoundArray.Count - 1
-            ResultList.Add(SpeechTestFramework.Utils.PearsonsCorrelation(DumpEnvelopeSingle.GetRange(i, NewSoundArray.Length).ToArray, NewSoundArray))
-        Next
-
-        Dim IndexOfMax = ResultList.IndexOf(ResultList.Max)
-
-        Dim Shift = IndexOfMax - NewSoundArray.Count
-        Dim TimeShift = Shift * 0.01
-
-        'Reloading the sound
-        Dim NewSoundReloaded As SpeechTestFramework.Audio.Sound = SpeechTestFramework.Audio.AudioIOs.LoadWaveFile(NewSoundFile)
-        If TimeShift <> 0 Then
-            If TimeShift < 0 Then
-                SpeechTestFramework.Audio.DSP.CropSection(NewSoundReloaded, Math.Round(-TimeShift * NewSoundReloaded.WaveFormat.SampleRate))
+            'Setting the level of the new sound to that desired
+            Dim PreAdjustmentLevel As Double
+            If TemporalIntegration = 0 Then
+                PreAdjustmentLevel = SpeechTestFramework.Audio.DSP.MeasureSectionLevel(NewSound, 1,,,,, FrequencyWeighting)
             Else
-                Dim SilenceArray(Math.Round(TimeShift * NewSoundReloaded.WaveFormat.SampleRate) - 1) As Single
-                Dim NewArray = SilenceArray.ToList
-                Dim CurrentArray = NewSoundReloaded.WaveData.SampleData(1)
-                NewArray.AddRange(CurrentArray)
-                NewSoundReloaded.WaveData.SampleData = NewArray.ToArray
+                PreAdjustmentLevel = SpeechTestFramework.Audio.DSP.GetLevelOfLoudestWindow(NewSound, 1, Math.Round(NewSound.WaveFormat.SampleRate * TemporalIntegration),,,, FrequencyWeighting)
             End If
-        End If
+            Dim NeededGain As Double = TargetSoundLevel - PreAdjustmentLevel
+            SpeechTestFramework.Audio.DSP.AmplifySection(NewSound, NeededGain)
+            'Getting the peak value so that it can be restored after the sync, which requires the sound to be normalized
+            Dim Channel1PositivePeak As Double = SpeechTestFramework.Audio.dBConversion(NewSound.WaveData.SampleData(1).Max, SpeechTestFramework.Audio.AudioManagement.dBConversionDirection.to_dB, NewSound.WaveFormat)
 
-        'Saving the synced sound
-        'Here we should store the sync data in the SMA chunk!
-        'NewSoundReloaded.SMA.AddChannelData()
+            SpeechTestFramework.Audio.DSP.MaxAmplitudeNormalizeSection(VideoDump)
+            SpeechTestFramework.Audio.DSP.MaxAmplitudeNormalizeSection(NewSound)
 
-        NewSoundReloaded.RemoveUnparsedWaveChunks()
+            Dim DumpEnvelope = SpeechTestFramework.Audio.DSP.GetEnvelope(VideoDump, 1, Math.Round(VideoDump.WaveFormat.SampleRate / 100))
+            Dim NewSoundEnvelope = SpeechTestFramework.Audio.DSP.GetEnvelope(NewSound, 1, Math.Round(NewSound.WaveFormat.SampleRate / 100))
 
-        NewSoundReloaded.WriteWaveFile(SyncedSoundFile)
+            'replacing negative infinity values
+            Dim NewSoundMin As Double = Double.PositiveInfinity
+            For Each value In NewSoundEnvelope
+                If Double.IsNegativeInfinity(value) = False Then
+                    NewSoundMin = Math.Min(NewSoundMin, value)
+                End If
+            Next
+            For n = 0 To NewSoundEnvelope.Count - 1
+                If Double.IsNegativeInfinity(NewSoundEnvelope(n)) Then NewSoundEnvelope(n) = NewSoundMin
+            Next
 
-        Return True
+            Dim DumpEnvelopeMin As Double = Double.PositiveInfinity
+            For Each value In DumpEnvelope
+                If Double.IsNegativeInfinity(value) = False Then
+                    DumpEnvelopeMin = Math.Min(DumpEnvelopeMin, value)
+                End If
+            Next
+            For n = 0 To DumpEnvelope.Count - 1
+                If Double.IsNegativeInfinity(DumpEnvelope(n)) Then DumpEnvelope(n) = DumpEnvelopeMin
+            Next
+
+            'Shifting
+            For n = 0 To DumpEnvelope.Count - 1
+                DumpEnvelope(n) -= DumpEnvelopeMin
+            Next
+            For n = 0 To NewSoundEnvelope.Count - 1
+                NewSoundEnvelope(n) -= NewSoundMin
+            Next
+
+            'Normalizing (into Lists of Single)
+            Dim DumpEnvelopeSingle As New List(Of Single)
+            Dim NewSoundEnvelopeSingle As New List(Of Single)
+            Dim DumpEnvelopeMax As Double = DumpEnvelope.Max
+            Dim NewSoundMax As Double = NewSoundEnvelope.Max
+            For n = 0 To DumpEnvelope.Count - 1
+                DumpEnvelopeSingle.Add(DumpEnvelope(n) / DumpEnvelopeMax)
+            Next
+            For n = 0 To NewSoundEnvelope.Count - 1
+                NewSoundEnvelopeSingle.Add(NewSoundEnvelope(n) / NewSoundMax)
+            Next
+
+            'Padding with zeros
+            For i = 0 To NewSoundEnvelope.Count - 1
+                DumpEnvelopeSingle.Insert(0, 0)
+                DumpEnvelopeSingle.Add(0)
+            Next
+
+            Dim ResultList As New List(Of Double)
+            Dim NewSoundArray As Single() = NewSoundEnvelopeSingle.ToArray()
+            For i = 0 To DumpEnvelopeSingle.Count - NewSoundArray.Count - 1
+                ResultList.Add(SpeechTestFramework.Utils.PearsonsCorrelation(DumpEnvelopeSingle.GetRange(i, NewSoundArray.Length).ToArray, NewSoundArray))
+            Next
+
+            Dim IndexOfMax = ResultList.IndexOf(ResultList.Max)
+
+            Dim Shift = IndexOfMax - NewSoundArray.Count
+            Dim TimeShift = Shift * 0.01
+
+            'Reloading the sound
+            Dim NewSoundReloaded As SpeechTestFramework.Audio.Sound = SpeechTestFramework.Audio.AudioIOs.LoadWaveFile(NewSoundFile)
+            Dim TempNewSoundReloaded = New SpeechTestFramework.Audio.Sound(New SpeechTestFramework.Audio.Formats.WaveFormat(NewSoundReloaded.WaveFormat.SampleRate, NewSoundReloaded.WaveFormat.BitDepth, NewSoundReloaded.WaveFormat.Channels, , SpeechTestFramework.Audio.Formats.WaveFormat.WaveFormatEncodings.IeeeFloatingPoints))
+            For c = 1 To TempNewSoundReloaded.WaveFormat.Channels
+                TempNewSoundReloaded.WaveData.SampleData(c) = NewSoundReloaded.WaveData.SampleData(c)
+            Next
+            NewSoundReloaded = TempNewSoundReloaded
+
+            If TimeShift <> 0 Then
+                If TimeShift < 0 Then
+                    SpeechTestFramework.Audio.DSP.CropSection(NewSoundReloaded, Math.Round(-TimeShift * NewSoundReloaded.WaveFormat.SampleRate))
+                Else
+                    Dim SilenceArray(Math.Round(TimeShift * NewSoundReloaded.WaveFormat.SampleRate) - 1) As Single
+                    Dim NewArray = SilenceArray.ToList
+                    Dim CurrentArray = NewSoundReloaded.WaveData.SampleData(1)
+                    NewArray.AddRange(CurrentArray)
+                    NewSoundReloaded.WaveData.SampleData = NewArray.ToArray
+                End If
+            End If
+
+            'Saving the synced sound
+            'Here we should store the sync data in the SMA chunk!
+            'NewSoundReloaded.SMA.AddChannelData()
+
+            NewSoundReloaded.RemoveUnparsedWaveChunks()
+
+            'Padding to the original length
+            NewSoundReloaded = NewSoundReloaded.ZeroPad(DumpSoundLength)
+
+            'Restoring the target sound level based on the Channel1PositivePeak stored above
+            Dim NewPeak = SpeechTestFramework.Audio.dBConversion(NewSoundReloaded.WaveData.SampleData(1).Max, SpeechTestFramework.Audio.AudioManagement.dBConversionDirection.to_dB, NewSoundReloaded.WaveFormat)
+            Dim ResetGain As Double = Channel1PositivePeak - NewPeak
+            SpeechTestFramework.Audio.DSP.AmplifySection(NewSoundReloaded, ResetGain)
+
+            'Converting to stereo
+            NewSoundReloaded = NewSoundReloaded.ConvertMonoToMultiChannel(2)
+
+            'Writing to file
+            NewSoundReloaded.WriteWaveFile(SyncedSoundFile)
+
+            Return True
+
+        Catch ex As Exception
+
+            Throw New Exception(ex.ToString)
+
+        End Try
 
     End Function
 
@@ -708,4 +818,26 @@ Public Class MainForm
 
     End Sub
 
+    Private Sub CustomToolsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles CustomToolsToolStripMenuItem.Click
+
+        'Checking that the ffmpeg.exe file exists
+        ffmpegPath = ffmpegPath_TextBox.Text.Trim
+        If ffmpegPath.Trim = "" Then
+            MsgBox("You must indicate the path to an ffmpeg.exe file!", MsgBoxStyle.Exclamation, "Video Extraction Tool")
+            ffmpegPath = ""
+            Exit Sub
+        End If
+        If IO.File.Exists(ffmpegPath) = False Then
+            MsgBox("The supplied path to the ffmpeg.exe file does not exist!", MsgBoxStyle.Exclamation, "Video Extraction Tool")
+            ffmpegPath = ""
+            Exit Sub
+        End If
+
+        Dim FilePath = SpeechTestFramework.Utils.GetOpenFilePath(,,, "Select a video file from which you want to extract the sound.")
+
+        ExportSoundFromVideo(FilePath, IO.Path.GetDirectoryName(FilePath), "_sound")
+
+        MsgBox("Finished extracting sound file!", MsgBoxStyle.Information, "Done!")
+
+    End Sub
 End Class
